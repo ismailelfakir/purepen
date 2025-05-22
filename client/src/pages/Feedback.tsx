@@ -29,8 +29,11 @@ const Feedback: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(null);
   const [relatedContent, setRelatedContent] = useState<RelatedContent[]>([]);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
   
   useEffect(() => {
+    let progressInterval: NodeJS.Timeout;
+    
     const pollAssignment = async () => {
       try {
         const response = await axios.get(`/assignments/${id}`);
@@ -48,21 +51,36 @@ const Feedback: React.FC = () => {
           });
           setRelatedContent(assignment.feedback.relatedContent || []);
           setIsLoading(false);
+          clearInterval(progressInterval);
+          setAnalysisProgress(100);
         } else if (assignment.status === 'error') {
           setError('Failed to analyze assignment');
           setIsLoading(false);
-        }
-        // If still analyzing, continue polling
-        else {
+          clearInterval(progressInterval);
+        } else {
+          // Continue polling
           setTimeout(() => pollAssignment(), 2000);
         }
       } catch (err: any) {
         setError(err.response?.data?.msg || 'Failed to load feedback');
         setIsLoading(false);
+        clearInterval(progressInterval);
       }
     };
 
+    // Start progress animation
+    progressInterval = setInterval(() => {
+      setAnalysisProgress(prev => {
+        if (prev >= 90) return prev;
+        return prev + 10;
+      });
+    }, 1000);
+
     pollAssignment();
+
+    return () => {
+      clearInterval(progressInterval);
+    };
   }, [id]);
   
   const handleFeedbackClick = (item: FeedbackItem) => {
@@ -77,8 +95,28 @@ const Feedback: React.FC = () => {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <div className="relative pt-1">
+            <div className="flex mb-2 items-center justify-between">
+              <div>
+                <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-primary-600 bg-primary-200">
+                  Analysis in progress
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-xs font-semibold inline-block text-primary-600">
+                  {analysisProgress}%
+                </span>
+              </div>
+            </div>
+            <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-primary-200">
+              <div 
+                style={{ width: `${analysisProgress}%` }}
+                className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-500 transition-all duration-500"
+              ></div>
+            </div>
+          </div>
           <p className="mt-4 text-gray-600">Analyzing your assignment...</p>
+          <p className="text-sm text-gray-500">This may take a few moments</p>
         </div>
       </div>
     );
@@ -89,6 +127,13 @@ const Feedback: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-error-50 border border-error-200 text-error-700 p-4 rounded-md">
           {error}
+          <Button 
+            variant="primary"
+            onClick={() => navigate('/new')}
+            className="mt-4"
+          >
+            Try Again
+          </Button>
         </div>
       </div>
     );
