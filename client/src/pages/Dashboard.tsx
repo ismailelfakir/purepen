@@ -1,76 +1,53 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PlusCircle, Calendar, TrendingUp } from 'lucide-react';
+import { PlusCircle, Calendar, TrendingUp, CheckCircle } from 'lucide-react';
+import axios from 'axios';
 import DashboardCard from '../components/DashboardCard';
 import Button from '../components/Button';
 import IntegrityScore from '../components/IntegrityScore';
 import { TextSubmission } from '../types';
 
-// Mock data for demonstration
-const mockSubmissions: TextSubmission[] = [
-  {
-    id: '1',
-    title: 'Research Paper on Climate Change',
-    content: 'The effects of climate change have been increasingly evident in recent years. According to Smith (2020), global temperatures have risen by 1.5 degrees Celsius since the pre-industrial era. This has led to significant environmental changes worldwide.',
-    createdAt: '2023-06-15T10:30:00Z',
-    integrityScore: 92,
-    status: 'complete'
-  },
-  {
-    id: '2',
-    title: 'Literature Analysis: The Great Gatsby',
-    content: 'F. Scott Fitzgerald\'s "The Great Gatsby" is a novel that explores the corruption of the American Dream. The character of Jay Gatsby represents the pursuit of wealth and status as a means to achieve happiness.',
-    createdAt: '2023-06-10T14:45:00Z',
-    integrityScore: 85,
-    status: 'complete'
-  },
-  {
-    id: '3',
-    title: 'History Essay: World War II',
-    content: 'World War II was a global conflict that lasted from 1939 to 1945. It involved many of the world\'s nations, including all of the great powers, forming two opposing military alliances: the Allies and the Axis.',
-    createdAt: '2023-06-05T09:15:00Z',
-    integrityScore: 78,
-    status: 'complete'
-  },
-  {
-    id: '4',
-    title: 'Psychology Report: Cognitive Development',
-    content: 'Cognitive development is the study of how thinking processes change over time. Jean Piaget\'s theory of cognitive development suggests that children move through four different stages of mental development.',
-    createdAt: '2023-05-28T16:20:00Z',
-    integrityScore: 95,
-    status: 'complete'
-  },
-  {
-    id: '5',
-    title: 'Draft: Final Project Outline',
-    content: 'This document outlines the structure and key points for my final project on renewable energy sources. I will be focusing on solar, wind, and hydroelectric power.',
-    createdAt: '2023-06-16T08:00:00Z',
-    integrityScore: 0,
-    status: 'analyzing'
-  }
-];
-
 const Dashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<TextSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [averageScore, setAverageScore] = useState(0);
   
   useEffect(() => {
     const fetchSubmissions = async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSubmissions(mockSubmissions);
-      
-      // Calculate average score
-      const completedSubmissions = mockSubmissions.filter(sub => sub.status === 'complete');
-      const totalScore = completedSubmissions.reduce((sum, sub) => sum + sub.integrityScore, 0);
-      setAverageScore(Math.round(totalScore / completedSubmissions.length) || 0);
-      
-      setIsLoading(false);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:5000/api/assignments', {
+          headers: {
+            'x-auth-token': token
+          }
+        });
+        
+        setSubmissions(response.data);
+        
+        // Calculate average score
+        const completedSubmissions = response.data.filter((sub: TextSubmission) => sub.status === 'complete');
+        const totalScore = completedSubmissions.reduce((sum: number, sub: TextSubmission) => sum + sub.integrityScore, 0);
+        setAverageScore(Math.round(totalScore / completedSubmissions.length) || 0);
+      } catch (err: any) {
+        setError(err.response?.data?.msg || 'Failed to fetch submissions');
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     fetchSubmissions();
   }, []);
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-error-50 border border-error-200 text-error-700 p-4 rounded-md">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -198,27 +175,6 @@ const Dashboard: React.FC = () => {
         </div>
       )}
     </div>
-  );
-};
-
-// For the CheckCircle icon used in the Recent Activity section
-const CheckCircle: React.FC<{ className?: string }> = ({ className }) => {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      className={className}
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-    </svg>
   );
 };
 
