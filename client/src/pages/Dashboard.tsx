@@ -16,20 +16,26 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/assignments', {
-          headers: {
-            'x-auth-token': token
-          }
-        });
+        const response = await axios.get('/assignments');
         
-        setSubmissions(response.data);
+        // Transform the response data to match TextSubmission type
+        const transformedSubmissions = response.data.map((sub: any) => ({
+          id: sub._id,
+          title: sub.title,
+          content: sub.content,
+          createdAt: sub.createdAt,
+          integrityScore: sub.integrityScore || 0,
+          status: sub.status || 'complete'
+        }));
+        
+        setSubmissions(transformedSubmissions);
         
         // Calculate average score
-        const completedSubmissions = response.data.filter((sub: TextSubmission) => sub.status === 'complete');
-        const totalScore = completedSubmissions.reduce((sum: number, sub: TextSubmission) => sum + sub.integrityScore, 0);
+        const completedSubmissions = transformedSubmissions.filter(sub => sub.status === 'complete');
+        const totalScore = completedSubmissions.reduce((sum, sub) => sum + sub.integrityScore, 0);
         setAverageScore(Math.round(totalScore / completedSubmissions.length) || 0);
       } catch (err: any) {
+        console.error('Error fetching submissions:', err);
         setError(err.response?.data?.msg || 'Failed to fetch submissions');
       } finally {
         setIsLoading(false);
@@ -86,27 +92,20 @@ const Dashboard: React.FC = () => {
           <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
           
           <div className="space-y-3">
-            <div className="flex items-start">
-              <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-                <PlusCircle className="h-4 w-4 text-primary-600" />
+            {submissions.slice(0, 2).map((submission) => (
+              <div key={submission.id} className="flex items-start">
+                <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="h-4 w-4 text-primary-600" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-900">Analysis completed</p>
+                  <p className="text-xs text-gray-500">{submission.title}</p>
+                  <p className="text-xs text-gray-400">
+                    {new Date(submission.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
               </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">New submission created</p>
-                <p className="text-xs text-gray-500">Draft: Final Project Outline</p>
-                <p className="text-xs text-gray-400">Just now</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start">
-              <div className="h-8 w-8 rounded-full bg-success-100 flex items-center justify-center flex-shrink-0">
-                <CheckCircle className="h-4 w-4 text-success-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Analysis completed</p>
-                <p className="text-xs text-gray-500">Research Paper on Climate Change</p>
-                <p className="text-xs text-gray-400">2 hours ago</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
         
@@ -119,24 +118,8 @@ const Dashboard: React.FC = () => {
           
           <div className="flex flex-col items-center justify-center h-36">
             <p className="text-sm text-gray-500 text-center">
-              You've submitted 5 assignments this month.
+              You've submitted {submissions.length} assignments.
             </p>
-            
-            <div className="mt-4 grid grid-cols-7 gap-1">
-              {[...Array(28)].map((_, i) => {
-                // Randomly determine if a day has a submission
-                const hasSubmission = [3, 7, 10, 15, 22].includes(i + 1);
-                return (
-                  <div
-                    key={i}
-                    className={`h-3 w-3 rounded-sm ${
-                      hasSubmission ? 'bg-primary-500' : 'bg-gray-200'
-                    }`}
-                    title={hasSubmission ? 'Submission on this day' : 'No submissions'}
-                  />
-                );
-              })}
-            </div>
           </div>
         </div>
       </div>
@@ -161,7 +144,7 @@ const Dashboard: React.FC = () => {
         </div>
       ) : (
         <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-          <PenLine className="mx-auto h-12 w-12 text-gray-400" />
+          <PlusCircle className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No submissions yet</h3>
           <p className="mt-1 text-sm text-gray-500">Get started by creating a new assignment.</p>
           <div className="mt-6">
