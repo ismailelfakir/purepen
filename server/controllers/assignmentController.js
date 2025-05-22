@@ -20,25 +20,23 @@ export const submitAssignment = async (req, res) => {
 
     await assignment.save();
 
-    // Analyze text using OpenAI in the background
-    analyzeText(content)
-      .then(async (analysis) => {
-        // Update assignment with analysis results
-        assignment.integrityScore = analysis.integrityScore;
-        assignment.feedback = {
-          summary: analysis.summary,
-          items: analysis.feedbackItems
-        };
-        assignment.status = 'complete';
-        await assignment.save();
-      })
-      .catch(async (err) => {
-        console.error('Analysis error:', err);
-        assignment.status = 'error';
-        await assignment.save();
-      });
+    // Analyze text
+    try {
+      const analysis = await analyzeText(content);
+      
+      assignment.integrityScore = analysis.integrityScore;
+      assignment.feedback = {
+        summary: analysis.summary,
+        items: analysis.feedbackItems
+      };
+      assignment.status = 'complete';
+      await assignment.save();
+    } catch (analysisError) {
+      console.error('Analysis error:', analysisError);
+      assignment.status = 'error';
+      await assignment.save();
+    }
 
-    // Return immediately with the assignment ID
     res.json({
       submissionId: assignment._id,
       message: 'Assignment submitted successfully'
@@ -52,10 +50,10 @@ export const submitAssignment = async (req, res) => {
 export const getAssignments = async (req, res) => {
   try {
     const assignments = await Assignment.find({ userId: req.user.id })
-      .sort({ createdAt: -1 })
-      .select('title content createdAt integrityScore status');
+      .sort({ createdAt: -1 });
     res.json(assignments);
   } catch (err) {
+    console.error('Error fetching assignments:', err);
     res.status(500).json({ msg: 'Failed to fetch assignments' });
   }
 };
@@ -73,6 +71,7 @@ export const getAssignment = async (req, res) => {
 
     res.json(assignment);
   } catch (err) {
+    console.error('Error fetching assignment:', err);
     res.status(500).json({ msg: 'Failed to fetch assignment' });
   }
 };

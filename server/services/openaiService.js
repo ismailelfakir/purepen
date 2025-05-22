@@ -6,33 +6,39 @@ const openai = new OpenAI({
 
 export const analyzeText = async (text) => {
   try {
+    // For testing purposes, return mock analysis immediately
+    return {
+      integrityScore: Math.floor(Math.random() * (95 - 70 + 1)) + 70,
+      summary: "Your text shows good academic writing practices with some areas for improvement.",
+      feedbackItems: [
+        {
+          id: 'feedback-1',
+          type: 'citation',
+          startIndex: Math.min(20, text.length),
+          endIndex: Math.min(80, text.length),
+          message: 'Consider adding a citation for this claim.',
+          suggestion: 'Add a reference to support this statement.',
+          severity: 'medium'
+        },
+        {
+          id: 'feedback-2',
+          type: 'positive',
+          startIndex: Math.min(100, text.length),
+          endIndex: Math.min(150, text.length),
+          message: 'Good use of academic language here.',
+          severity: 'low'
+        }
+      ]
+    };
+
+    // Uncomment below for actual OpenAI integration
+    /*
     const response = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
           role: "system",
-          content: `You are an academic integrity assistant. Analyze the given text and provide structured feedback in the following JSON format:
-          {
-            "integrityScore": number (0-100),
-            "summary": "overall analysis summary",
-            "feedbackItems": [
-              {
-                "type": "plagiarism" | "citation" | "paraphrase" | "positive",
-                "startIndex": number,
-                "endIndex": number,
-                "message": "specific feedback message",
-                "suggestion": "improvement suggestion",
-                "severity": "low" | "medium" | "high"
-              }
-            ]
-          }
-          
-          Guidelines:
-          - Identify potential plagiarism
-          - Suggest where citations are needed
-          - Recommend better paraphrasing
-          - Highlight good academic writing practices
-          - Provide specific text locations for each feedback item`
+          content: `You are an academic integrity assistant. Analyze the given text and provide structured feedback.`
         },
         {
           role: "user",
@@ -53,8 +59,9 @@ export const analyzeText = async (text) => {
         id: `feedback-${index + 1}`
       }))
     };
+    */
   } catch (error) {
-    console.error('OpenAI API Error:', error);
+    console.error('Analysis error:', error);
     throw new Error('Failed to analyze text');
   }
 };
