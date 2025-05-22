@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -16,9 +17,16 @@ import Profile from './pages/Profile';
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const token = localStorage.getItem('token');
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   
-  if (!isLoggedIn) {
+  useEffect(() => {
+    if (token) {
+      axios.defaults.headers.common['x-auth-token'] = token;
+    }
+  }, [token]);
+  
+  if (!isLoggedIn || !token) {
     return <Navigate to="/login" replace />;
   }
   
@@ -26,6 +34,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
+  // Set up axios defaults
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.defaults.headers.common['x-auth-token'] = token;
+    }
+    
+    axios.defaults.baseURL = 'http://localhost:5000/api';
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
