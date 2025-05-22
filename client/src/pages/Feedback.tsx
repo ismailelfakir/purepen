@@ -21,41 +21,38 @@ const Feedback: React.FC = () => {
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(null);
   
   useEffect(() => {
-    const loadFeedback = async () => {
-      setIsLoading(true);
-      
+    const pollAssignment = async () => {
       try {
-        if (location.state?.isNew) {
-          setTitle(location.state.title);
-          setContent(location.state.content);
-          setFeedback(location.state.analysis);
-        } else {
-          const token = localStorage.getItem('token');
-          const response = await axios.get(`http://localhost:5000/api/assignments/${id}`, {
-            headers: {
-              'x-auth-token': token
-            }
-          });
-          
-          const assignment = response.data;
-          setTitle(assignment.title);
-          setContent(assignment.content);
+        const response = await axios.get(`/assignments/${id}`);
+        const assignment = response.data;
+        
+        setTitle(assignment.title);
+        setContent(assignment.content);
+        
+        if (assignment.status === 'complete') {
           setFeedback({
             submissionId: assignment._id,
             integrityScore: assignment.integrityScore,
             summary: assignment.feedback.summary,
             feedbackItems: assignment.feedback.items
           });
+          setIsLoading(false);
+        } else if (assignment.status === 'error') {
+          setError('Failed to analyze assignment');
+          setIsLoading(false);
+        }
+        // If still analyzing, continue polling
+        else {
+          setTimeout(() => pollAssignment(), 2000);
         }
       } catch (err: any) {
         setError(err.response?.data?.msg || 'Failed to load feedback');
-      } finally {
         setIsLoading(false);
       }
     };
-    
-    loadFeedback();
-  }, [id, location]);
+
+    pollAssignment();
+  }, [id]);
   
   const handleFeedbackClick = (item: FeedbackItem) => {
     setSelectedFeedback(item);
@@ -68,23 +65,24 @@ const Feedback: React.FC = () => {
   if (isLoading) {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-2/3 mb-8"></div>
-          
-          <div className="flex flex-col lg:flex-row gap-6">
-            <div className="lg:w-3/4">
-              <div className="h-64 bg-gray-200 rounded mb-6"></div>
-            </div>
-            <div className="lg:w-1/4">
-              <div className="h-64 bg-gray-200 rounded"></div>
-            </div>
-          </div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Analyzing your assignment...</p>
         </div>
       </div>
     );
   }
-  
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-error-50 border border-error-200 text-error-700 p-4 rounded-md">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center mb-6">
