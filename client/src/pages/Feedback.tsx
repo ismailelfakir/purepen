@@ -1,54 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import FeedbackHighlighter from '../components/FeedbackHighlighter';
 import FeedbackSidebar from '../components/FeedbackSidebar';
 import IntegrityScore from '../components/IntegrityScore';
 import Button from '../components/Button';
 import { FeedbackItem, TextFeedback } from '../types';
 import { ArrowLeft, Download, Share2 } from 'lucide-react';
-
-// Mock feedback data
-const mockFeedback: TextFeedback = {
-  submissionId: '1',
-  integrityScore: 85,
-  summary: 'Your assignment shows good original thinking with a few areas where citations or paraphrasing could be improved. Overall, you have a strong foundation in academic integrity practices.',
-  feedbackItems: [
-    {
-      id: '1',
-      type: 'plagiarism',
-      startIndex: 20,
-      endIndex: 65,
-      message: 'This text appears to be copied from another source.',
-      suggestion: 'Consider rewriting this in your own words or adding proper citation.',
-      severity: 'high'
-    },
-    {
-      id: '2',
-      type: 'citation',
-      startIndex: 120,
-      endIndex: 180,
-      message: 'This information would benefit from a citation.',
-      suggestion: 'Add a citation for this fact or statistic.',
-      severity: 'medium'
-    },
-    {
-      id: '3',
-      type: 'paraphrase',
-      startIndex: 200,
-      endIndex: 260,
-      message: 'This text is too close to the original source.',
-      suggestion: 'Try to restate this using different words while keeping the same meaning.',
-      severity: 'low'
-    },
-    {
-      id: '4',
-      type: 'positive',
-      startIndex: 300,
-      endIndex: 350,
-      message: 'Excellent use of citation here!',
-    }
-  ]
-};
 
 const Feedback: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -59,6 +17,7 @@ const Feedback: React.FC = () => {
   const [content, setContent] = useState('');
   const [feedback, setFeedback] = useState<TextFeedback | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(null);
   
   useEffect(() => {
@@ -66,28 +25,30 @@ const Feedback: React.FC = () => {
       setIsLoading(true);
       
       try {
-        // Use location state if available (new submissions) or simulate API call
         if (location.state?.isNew) {
           setTitle(location.state.title);
           setContent(location.state.content);
-          
-          // Simulate delay for AI processing
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          
-          // Generate random feedback for the new content
-          const newFeedback = generateFeedback(location.state.content);
-          setFeedback(newFeedback);
+          setFeedback(location.state.analysis);
         } else {
-          // Simulate API call for existing feedback
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          const token = localStorage.getItem('token');
+          const response = await axios.get(`http://localhost:5000/api/assignments/${id}`, {
+            headers: {
+              'x-auth-token': token
+            }
+          });
           
-          // For demo purposes, use mock data
-          setTitle('Research Paper on Climate Change');
-          setContent('The effects of climate change have been increasingly evident in recent years. Global temperatures have risen by 1.5 degrees Celsius since the pre-industrial era. This has led to significant environmental changes worldwide including more extreme weather events, rising sea levels, and threats to biodiversity. According to Smith (2020), these changes are primarily driven by human activities, particularly the burning of fossil fuels. Recent studies have shown that immediate action is necessary to mitigate the worst effects of climate change. Researchers suggest that a combination of policy changes, technological innovation, and individual lifestyle changes will be required to address this global challenge effectively.');
-          setFeedback(mockFeedback);
+          const assignment = response.data;
+          setTitle(assignment.title);
+          setContent(assignment.content);
+          setFeedback({
+            submissionId: assignment._id,
+            integrityScore: assignment.integrityScore,
+            summary: assignment.feedback.summary,
+            feedbackItems: assignment.feedback.items
+          });
         }
-      } catch (error) {
-        console.error('Error loading feedback:', error);
+      } catch (err: any) {
+        setError(err.response?.data?.msg || 'Failed to load feedback');
       } finally {
         setIsLoading(false);
       }
@@ -95,68 +56,6 @@ const Feedback: React.FC = () => {
     
     loadFeedback();
   }, [id, location]);
-  
-  // Function to generate random feedback for demo purposes
-  const generateFeedback = (text: string): TextFeedback => {
-    // This is a simplified demo function to create random feedback
-    const textLength = text.length;
-    const numFeedbackItems = Math.min(Math.floor(textLength / 150) + 1, 5);
-    
-    const feedbackTypes: ('plagiarism' | 'citation' | 'paraphrase' | 'positive')[] = 
-      ['plagiarism', 'citation', 'paraphrase', 'positive'];
-    
-    const severityTypes: ('low' | 'medium' | 'high')[] = ['low', 'medium', 'high'];
-    
-    const feedbackItems: FeedbackItem[] = [];
-    
-    for (let i = 0; i < numFeedbackItems; i++) {
-      const startIndex = Math.floor(Math.random() * (textLength - 100));
-      const endIndex = Math.min(startIndex + 50 + Math.floor(Math.random() * 50), textLength);
-      
-      const type = feedbackTypes[Math.floor(Math.random() * feedbackTypes.length)];
-      
-      let message, suggestion;
-      
-      switch (type) {
-        case 'plagiarism':
-          message = 'This text appears to be copied from another source.';
-          suggestion = 'Consider rewriting this in your own words or adding proper citation.';
-          break;
-        case 'citation':
-          message = 'This information would benefit from a citation.';
-          suggestion = 'Add a citation for this fact or statistic.';
-          break;
-        case 'paraphrase':
-          message = 'This text is too close to the original source.';
-          suggestion = 'Try to restate this using different words while keeping the same meaning.';
-          break;
-        case 'positive':
-          message = 'Excellent use of original thinking here!';
-          suggestion = undefined;
-          break;
-      }
-      
-      feedbackItems.push({
-        id: `gen-${i}`,
-        type,
-        startIndex,
-        endIndex,
-        message,
-        suggestion,
-        severity: type !== 'positive' ? severityTypes[Math.floor(Math.random() * 3)] : undefined
-      });
-    }
-    
-    // Sort by startIndex to ensure they appear in order
-    feedbackItems.sort((a, b) => a.startIndex - b.startIndex);
-    
-    return {
-      submissionId: id || 'new',
-      integrityScore: 60 + Math.floor(Math.random() * 30),
-      summary: 'Your assignment shows good original thinking with a few areas where citations or paraphrasing could be improved. Keep working on properly attributing sources and paraphrasing effectively.',
-      feedbackItems
-    };
-  };
   
   const handleFeedbackClick = (item: FeedbackItem) => {
     setSelectedFeedback(item);
