@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  client:
+    build: ./client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://server:5000/api
+    depends_on:
+      - server
+
+  server:
+    build: ./server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/purepen
+      - JWT_SECRET=your_jwt_secret
+      - OPENAI_API_KEY=your_openai_api_key
+      - GOOGLE_API_KEY=your_google_api_key
+      - GOOGLE_SEARCH_ENGINE_ID=your_search_engine_id
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
