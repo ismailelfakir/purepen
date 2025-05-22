@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PenLine } from 'lucide-react';
 import Button from '../components/Button';
+import axios from 'axios';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -17,20 +18,26 @@ const Login: React.FC = () => {
     setError(null);
     setIsLoading(true);
     
-    // Simulate API call
     try {
-      // Simple validation
-      if (!email.includes('@') || password.length < 6) {
-        throw new Error('Invalid email or password. Password must be at least 6 characters.');
-      }
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email,
+        password
+      });
+
+      const { token, user } = response.data;
       
-      // Simulate successful login
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Store token and user info
+      localStorage.setItem('token', token);
+      localStorage.setItem('userName', user.name);
+      localStorage.setItem('userEmail', user.email);
       localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userEmail', email);
+      
+      // Set default authorization header for all future requests
+      axios.defaults.headers.common['x-auth-token'] = token;
+
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Failed to log in. Please check your credentials and try again.');
+      setError(err.response?.data?.msg || 'Failed to log in. Please check your credentials and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -40,7 +47,6 @@ const Login: React.FC = () => {
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          {/* <PenLine className="h-12 w-12 text-primary-600" /> */}
           <img src="../public/logo.png" alt="logo-pure-pen" width={200}/>
         </div>
         <h2 className="mt-6 text-center text-3xl font-heading font-bold text-gray-900">

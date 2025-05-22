@@ -3,22 +3,19 @@ import User from '../models/user.js';
 
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
-  console.log('Received signup request:', { name, email, password }); // Debug log
+  console.log('Received signup request:', { name, email });
 
   if (!name || !email || !password) {
-    console.log('Validation failed: Missing fields');
     return res.status(400).json({ msg: 'Please provide name, email, and password' });
   }
 
   if (password.length < 6) {
-    console.log('Validation failed: Password too short');
     return res.status(400).json({ msg: 'Password must be at least 6 characters long' });
   }
 
   try {
     let user = await User.findOne({ email });
     if (user) {
-      console.log('User already exists:', email);
       return res.status(400).json({ msg: 'User already exists' });
     }
 
@@ -26,14 +23,12 @@ export const signup = async (req, res) => {
       name,
       email,
       password,
-      agreeToTerms: true,
     });
 
     await user.save();
-    console.log('User saved:', user); // Debug log
 
     const payload = { user: { id: user.id } };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '24h' });
 
     res.json({
       token,
@@ -44,7 +39,7 @@ export const signup = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error('Signup error:', err); // Debug log
+    console.error('Signup error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 };
@@ -68,7 +63,7 @@ export const login = async (req, res) => {
     }
 
     const payload = { user: { id: user.id } };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '24h' });
 
     res.json({
       token,
@@ -79,7 +74,7 @@ export const login = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error(err.message);
+    console.error('Login error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 };
