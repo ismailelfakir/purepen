@@ -23,7 +23,6 @@ const TextEditor: React.FC<TextEditorProps> = ({ onSubmit, isSubmitting = false 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate input
     if (!title.trim()) {
       setError('Please enter a title for your assignment.');
       return;
@@ -42,7 +41,6 @@ const TextEditor: React.FC<TextEditorProps> = ({ onSubmit, isSubmitting = false 
     const file = e.target.files?.[0];
     if (!file) return;
     
-    // Only accept text files
     if (!file.type.includes('text') && !file.name.endsWith('.txt') && !file.name.endsWith('.md')) {
       setError('Please upload a text file (.txt or .md).');
       return;
@@ -53,9 +51,8 @@ const TextEditor: React.FC<TextEditorProps> = ({ onSubmit, isSubmitting = false 
       if (event.target?.result) {
         setContent(event.target.result as string);
         
-        // Auto-generate a title from the filename if none exists
         if (!title) {
-          const fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+          const fileName = file.name.replace(/\.[^/.]+$/, "");
           setTitle(fileName);
         }
       }
@@ -69,13 +66,13 @@ const TextEditor: React.FC<TextEditorProps> = ({ onSubmit, isSubmitting = false 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="p-3 bg-error-50 border border-error-200 text-error-700 rounded-md">
+        <div className="p-3 bg-error-50 dark:bg-error-900/50 border border-error-200 dark:border-error-800 text-error-700 dark:text-error-200 rounded-md">
           {error}
         </div>
       )}
       
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Assignment Title
         </label>
         <input
@@ -83,13 +80,13 @@ const TextEditor: React.FC<TextEditorProps> = ({ onSubmit, isSubmitting = false 
           id="title"
           value={title}
           onChange={handleTitleChange}
-          className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+          className="mt-1 w-full rounded-md border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 dark:focus:border-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400"
           placeholder="Enter a title for your assignment"
         />
       </div>
       
       <div>
-        <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Assignment Text
         </label>
         <textarea
@@ -97,14 +94,14 @@ const TextEditor: React.FC<TextEditorProps> = ({ onSubmit, isSubmitting = false 
           value={content}
           onChange={handleContentChange}
           rows={12}
-          className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+          className="mt-1 w-full rounded-md border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 dark:focus:border-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400"
           placeholder="Type or paste your assignment text here..."
         ></textarea>
       </div>
       
       <div className="flex items-center space-x-2">
-        <span className="text-sm text-gray-500">Or upload a text file:</span>
-        <label className="cursor-pointer inline-flex items-center space-x-1 text-primary-600 hover:text-primary-800">
+        <span className="text-sm text-gray-500 dark:text-gray-400">Or upload a text file:</span>
+        <label className="cursor-pointer inline-flex items-center space-x-1 text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300">
           <Upload className="h-4 w-4" />
           <span className="text-sm">Upload</span>
           <input
@@ -125,7 +122,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ onSubmit, isSubmitting = false 
         >
           Analyze for Integrity
         </Button>
-        <p className="mt-2 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
           By submitting, you agree to our privacy policy. Your text will be analyzed for academic integrity but will not be stored permanently without your consent.
         </p>
       </div>
