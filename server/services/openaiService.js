@@ -11,70 +11,50 @@ export const analyzeText = async (text) => {
       messages: [
         {
           role: "system",
-          content: "You are an academic integrity assistant. Analyze the text for potential plagiarism, citation needs, and paraphrasing suggestions. Provide detailed feedback with specific locations in the text."
+          content: `You are an academic integrity assistant. Analyze the given text and provide structured feedback in the following JSON format:
+          {
+            "integrityScore": number (0-100),
+            "summary": "overall analysis summary",
+            "feedbackItems": [
+              {
+                "type": "plagiarism" | "citation" | "paraphrase" | "positive",
+                "startIndex": number,
+                "endIndex": number,
+                "message": "specific feedback message",
+                "suggestion": "improvement suggestion",
+                "severity": "low" | "medium" | "high"
+              }
+            ]
+          }
+          
+          Guidelines:
+          - Identify potential plagiarism
+          - Suggest where citations are needed
+          - Recommend better paraphrasing
+          - Highlight good academic writing practices
+          - Provide specific text locations for each feedback item`
         },
         {
           role: "user",
           content: text
         }
       ],
+      response_format: { type: "json_object" },
       temperature: 0.7,
-      max_tokens: 1000
+      max_tokens: 2000
     });
 
-    const analysis = response.choices[0].message.content;
-    
-    // Parse the analysis to create structured feedback
-    const feedbackItems = [];
-    let integrityScore = 85; // Base score
-    
-    // Simple scoring logic based on detected issues
-    if (analysis.toLowerCase().includes('plagiarism')) {
-      integrityScore -= 20;
-    }
-    if (analysis.toLowerCase().includes('citation')) {
-      integrityScore -= 10;
-    }
-    if (analysis.toLowerCase().includes('paraphrase')) {
-      integrityScore -= 5;
-    }
-
-    // Ensure score stays within 0-100 range
-    integrityScore = Math.max(0, Math.min(100, integrityScore));
-
+    const analysis = JSON.parse(response.choices[0].message.content);
     return {
-      integrityScore,
-      summary: analysis,
-      feedbackItems: generateFeedbackItems(text, analysis)
+      integrityScore: analysis.integrityScore,
+      summary: analysis.summary,
+      feedbackItems: analysis.feedbackItems.map((item, index) => ({
+        ...item,
+        id: `feedback-${index + 1}`
+      }))
     };
   } catch (error) {
     console.error('OpenAI API Error:', error);
     throw new Error('Failed to analyze text');
   }
-};
-
-const generateFeedbackItems = (text, analysis) => {
-  const items = [];
-  let id = 1;
-
-  // Example logic to generate feedback items
-  const sentences = text.split('. ');
-  sentences.forEach((sentence, index) => {
-    const start = text.indexOf(sentence);
-    const end = start + sentence.length;
-
-    if (analysis.toLowerCase().includes(sentence.toLowerCase().substring(0, 20))) {
-      items.push({
-        id: `feedback-${id++}`,
-        type: 'plagiarism',
-        startIndex: start,
-        endIndex: end,
-        message: 'Potential plagiarism detected',
-        suggestion: 'Consider rewriting this section in your own words',
-        severity: 'high'
-      });
-    }
-  });
-
-  return items;
 };

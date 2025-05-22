@@ -10,19 +10,26 @@ export const submitAssignment = async (req, res) => {
   }
 
   try {
-    // Analyze text using OpenAI
-    const analysis = await analyzeText(content);
-
-    const assignment = new Assignment({
+    // Create assignment with initial analyzing status
+    let assignment = new Assignment({
       userId,
       title,
       content,
-      integrityScore: analysis.integrityScore,
-      feedback: {
-        summary: analysis.summary,
-        items: analysis.feedbackItems
-      }
+      status: 'analyzing'
     });
+
+    await assignment.save();
+
+    // Analyze text using OpenAI
+    const analysis = await analyzeText(content);
+
+    // Update assignment with analysis results
+    assignment.integrityScore = analysis.integrityScore;
+    assignment.feedback = {
+      summary: analysis.summary,
+      items: analysis.feedbackItems
+    };
+    assignment.status = 'complete';
 
     await assignment.save();
 
@@ -33,17 +40,28 @@ export const submitAssignment = async (req, res) => {
     });
   } catch (err) {
     console.error('Error submitting assignment:', err);
-    res.status(500).json({ msg: 'Server error' });
+    
+    // Update assignment status to error if analysis fails
+    if (err.message === 'Failed to analyze text') {
+      try {
+        await Assignment.findByIdAndUpdate(assignment._id, { status: 'error' });
+      } catch (updateErr) {
+        console.error('Error updating assignment status:', updateErr);
+      }
+    }
+    
+    res.status(500).json({ msg: 'Failed to analyze assignment' });
   }
 };
 
 export const getAssignments = async (req, res) => {
   try {
     const assignments = await Assignment.find({ userId: req.user.id })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .select('title content createdAt integrityScore status');
     res.json(assignments);
   } catch (err) {
-    res.status(500).json({ msg: 'Server error' });
+    res.status(500).json({ msg: 'Failed to fetch assignments' });
   }
 };
 
@@ -60,6 +78,6 @@ export const getAssignment = async (req, res) => {
 
     res.json(assignment);
   } catch (err) {
-    res.status(500).json({ msg: 'Server error' });
+    res.status(500).json({ msg: 'Failed to fetch assignment' });
   }
 };
