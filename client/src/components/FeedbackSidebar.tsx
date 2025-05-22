@@ -1,14 +1,28 @@
 import React from 'react';
 import { FeedbackItem } from '../types';
-import { AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Info, X, Youtube, BookOpen, ExternalLink } from 'lucide-react';
+
+interface Resource {
+  title: string;
+  link: string;
+  snippet: string;
+  type: 'video' | 'article';
+}
+
+interface RelatedContent {
+  text: string;
+  resources: Resource[];
+}
 
 interface FeedbackSidebarProps {
   selectedFeedback?: FeedbackItem | null;
+  relatedContent?: RelatedContent[];
   onClose: () => void;
 }
 
 const FeedbackSidebar: React.FC<FeedbackSidebarProps> = ({ 
   selectedFeedback, 
+  relatedContent,
   onClose 
 }) => {
   if (!selectedFeedback) return null;
@@ -44,8 +58,13 @@ const FeedbackSidebar: React.FC<FeedbackSidebarProps> = ({
       bgColor = 'bg-gray-50';
   }
 
+  // Find related content for the selected text
+  const matchingContent = selectedFeedback.type === 'plagiarism' && relatedContent?.find(
+    content => content.text === selectedFeedback.text
+  );
+
   return (
-    <div className={`${bgColor} border-l border-gray-200 p-4 w-full md:w-80 animate-slide-up`}>
+    <div className={`${bgColor} border-l border-gray-200 p-4 w-full md:w-80 animate-slide-up overflow-y-auto`}>
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center">
           {icon}
@@ -76,6 +95,43 @@ const FeedbackSidebar: React.FC<FeedbackSidebarProps> = ({
             }`}>
               {selectedFeedback.severity.charAt(0).toUpperCase() + selectedFeedback.severity.slice(1)}
             </span>
+          </div>
+        )}
+
+        {matchingContent && matchingContent.resources.length > 0 && (
+          <div className="mt-6">
+            <h4 className="text-sm font-medium text-gray-900 mb-3">Related Resources</h4>
+            <div className="space-y-3">
+              {matchingContent.resources.map((resource, index) => (
+                <a
+                  key={index}
+                  href={resource.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block p-3 bg-white rounded border border-gray-200 hover:border-primary-300 transition-colors"
+                >
+                  <div className="flex items-start">
+                    {resource.type === 'video' ? (
+                      <Youtube className="h-5 w-5 text-error-500 mt-1 flex-shrink-0" />
+                    ) : (
+                      <BookOpen className="h-5 w-5 text-primary-500 mt-1 flex-shrink-0" />
+                    )}
+                    <div className="ml-2">
+                      <p className="text-sm font-medium text-gray-900 line-clamp-2">
+                        {resource.title}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                        {resource.snippet}
+                      </p>
+                      <div className="flex items-center mt-2 text-xs text-primary-600">
+                        <span>Learn more</span>
+                        <ExternalLink className="h-3 w-3 ml-1" />
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
         )}
       </div>

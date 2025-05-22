@@ -1,5 +1,20 @@
 import mongoose from 'mongoose';
 
+const resourceSchema = new mongoose.Schema({
+  title: String,
+  link: String,
+  snippet: String,
+  type: {
+    type: String,
+    enum: ['video', 'article']
+  }
+});
+
+const relatedContentSchema = new mongoose.Schema({
+  text: String,
+  resources: [resourceSchema]
+});
+
 const feedbackItemSchema = new mongoose.Schema({
   type: {
     type: String,
@@ -37,7 +52,8 @@ const assignmentSchema = new mongoose.Schema({
   },
   feedback: {
     summary: String,
-    items: [feedbackItemSchema]
+    items: [feedbackItemSchema],
+    relatedContent: [relatedContentSchema]
   },
   status: {
     type: String,

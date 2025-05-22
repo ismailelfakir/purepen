@@ -1,5 +1,6 @@
 import Assignment from '../models/assignment.js';
 import { analyzeText } from '../services/openaiService.js';
+import { searchRelatedContent } from '../services/googleSearchService.js';
 
 export const submitAssignment = async (req, res) => {
   const { title, content } = req.body;
@@ -24,10 +25,25 @@ export const submitAssignment = async (req, res) => {
     try {
       const analysis = await analyzeText(content);
       
+      // Find plagiarized sections and get related content
+      const plagiarizedTexts = analysis.feedbackItems
+        .filter(item => item.type === 'plagiarism')
+        .map(item => content.substring(item.startIndex, item.endIndex));
+
+      const relatedContent = [];
+      for (const text of plagiarizedTexts) {
+        const resources = await searchRelatedContent(text);
+        relatedContent.push({
+          text,
+          resources
+        });
+      }
+      
       assignment.integrityScore = analysis.integrityScore;
       assignment.feedback = {
         summary: analysis.summary,
-        items: analysis.feedbackItems
+        items: analysis.feedbackItems,
+        relatedContent
       };
       assignment.status = 'complete';
       await assignment.save();

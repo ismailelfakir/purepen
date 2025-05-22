@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import FeedbackHighlighter from '../components/FeedbackHighlighter';
 import FeedbackSidebar from '../components/FeedbackSidebar';
@@ -8,9 +8,18 @@ import Button from '../components/Button';
 import { FeedbackItem, TextFeedback } from '../types';
 import { ArrowLeft, Download, Share2 } from 'lucide-react';
 
+interface RelatedContent {
+  text: string;
+  resources: {
+    title: string;
+    link: string;
+    snippet: string;
+    type: 'video' | 'article';
+  }[];
+}
+
 const Feedback: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const location = useLocation();
   const navigate = useNavigate();
   
   const [title, setTitle] = useState('');
@@ -19,6 +28,7 @@ const Feedback: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(null);
+  const [relatedContent, setRelatedContent] = useState<RelatedContent[]>([]);
   
   useEffect(() => {
     const pollAssignment = async () => {
@@ -36,6 +46,7 @@ const Feedback: React.FC = () => {
             summary: assignment.feedback.summary,
             feedbackItems: assignment.feedback.items
           });
+          setRelatedContent(assignment.feedback.relatedContent || []);
           setIsLoading(false);
         } else if (assignment.status === 'error') {
           setError('Failed to analyze assignment');
@@ -213,6 +224,7 @@ const Feedback: React.FC = () => {
             
             <FeedbackSidebar
               selectedFeedback={selectedFeedback}
+              relatedContent={relatedContent}
               onClose={handleCloseSidebar}
             />
           </div>
