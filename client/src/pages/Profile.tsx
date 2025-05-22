@@ -11,7 +11,6 @@ const Profile: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    // Simulate fetching user data
     const userName = localStorage.getItem('userName') || 'John Doe';
     const userEmail = localStorage.getItem('userEmail') || 'john.doe@example.com';
     
@@ -22,31 +21,26 @@ const Profile: React.FC = () => {
 
   const handleSaveProfile = async () => {
     setIsSaving(true);
-    
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Update local storage for demo
     localStorage.setItem('userName', name);
     localStorage.setItem('userEmail', email);
-    
     setIsSaving(false);
     setIsEditing(false);
   };
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-heading font-bold text-gray-900 mb-6">Account Settings</h1>
+      <h1 className="text-2xl font-heading font-bold text-gray-900 dark:text-white mb-6">Account Settings</h1>
       
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm border border-gray-200 dark:border-dark-700">
         {/* Tabs */}
-        <div className="flex border-b border-gray-200">
+        <div className="flex border-b border-gray-200 dark:border-dark-700">
           <button
             onClick={() => setActiveTab('profile')}
             className={`px-4 py-4 text-sm font-medium flex items-center ${
               activeTab === 'profile'
-                ? 'border-b-2 border-primary-500 text-primary-600'
-                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
             <User className="h-5 w-5 mr-2" />
@@ -57,8 +51,8 @@ const Profile: React.FC = () => {
             onClick={() => setActiveTab('security')}
             className={`px-4 py-4 text-sm font-medium flex items-center ${
               activeTab === 'security'
-                ? 'border-b-2 border-primary-500 text-primary-600'
-                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
             <Lock className="h-5 w-5 mr-2" />
@@ -69,8 +63,8 @@ const Profile: React.FC = () => {
             onClick={() => setActiveTab('privacy')}
             className={`px-4 py-4 text-sm font-medium flex items-center ${
               activeTab === 'privacy'
-                ? 'border-b-2 border-primary-500 text-primary-600'
-                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
             <Settings className="h-5 w-5 mr-2" />
@@ -83,12 +77,12 @@ const Profile: React.FC = () => {
           {/* Profile Tab */}
           {activeTab === 'profile' && (
             <div className="animate-fade-in">
-              <h2 className="text-lg font-medium text-gray-900 mb-6">Profile Information</h2>
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Profile Information</h2>
               
               {isEditing ? (
                 <div className="space-y-6">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Name
                     </label>
                     <input
@@ -96,12 +90,12 @@ const Profile: React.FC = () => {
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                      className="mt-1 w-full rounded-md border-gray-300 dark:border-dark-600 shadow-sm focus:border-primary-500 dark:focus:border-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
                     />
                   </div>
                   
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Email
                     </label>
                     <input
@@ -109,12 +103,12 @@ const Profile: React.FC = () => {
                       id="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                      className="mt-1 w-full rounded-md border-gray-300 dark:border-dark-600 shadow-sm focus:border-primary-500 dark:focus:border-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
                     />
                   </div>
                   
                   <div>
-                    <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Bio
                     </label>
                     <textarea
@@ -122,7 +116,7 @@ const Profile: React.FC = () => {
                       rows={3}
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                      className="mt-1 w-full rounded-md border-gray-300 dark:border-dark-600 shadow-sm focus:border-primary-500 dark:focus:border-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
                     />
                   </div>
                   
@@ -144,24 +138,24 @@ const Profile: React.FC = () => {
                 </div>
               ) : (
                 <div>
-                  <div className="sm:flex sm:items-start border-b border-gray-200 pb-6 mb-6">
-                    <div className="bg-primary-100 h-16 w-16 rounded-full flex items-center justify-center text-primary-600 text-xl font-bold">
+                  <div className="sm:flex sm:items-start border-b border-gray-200 dark:border-dark-700 pb-6 mb-6">
+                    <div className="bg-primary-100 dark:bg-primary-900/50 h-16 w-16 rounded-full flex items-center justify-center text-primary-600 dark:text-primary-400 text-xl font-bold">
                       {name.split(' ').map(n => n[0]).join('')}
                     </div>
                     
                     <div className="mt-4 sm:mt-0 sm:ml-6">
-                      <h3 className="text-xl font-medium text-gray-900">{name}</h3>
-                      <p className="text-gray-500">{email}</p>
-                      <p className="mt-2 text-sm text-gray-600">{bio}</p>
+                      <h3 className="text-xl font-medium text-gray-900 dark:text-white">{name}</h3>
+                      <p className="text-gray-500 dark:text-gray-400">{email}</p>
+                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{bio}</p>
                     </div>
                   </div>
                   
                   <div className="mb-6">
-                    <h3 className="text-md font-medium text-gray-900 mb-4">Subscription</h3>
-                    <div className="bg-primary-50 border border-primary-100 rounded-md p-4 flex justify-between items-center">
+                    <h3 className="text-md font-medium text-gray-900 dark:text-white mb-4">Subscription</h3>
+                    <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800 rounded-md p-4 flex justify-between items-center">
                       <div>
-                        <p className="font-medium text-gray-900">Free Plan</p>
-                        <p className="text-sm text-gray-600">Basic integrity checking with limited submissions</p>
+                        <p className="font-medium text-gray-900 dark:text-white">Free Plan</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Basic integrity checking with limited submissions</p>
                       </div>
                       <Button variant="secondary">Upgrade</Button>
                     </div>
@@ -180,42 +174,42 @@ const Profile: React.FC = () => {
           {/* Security Tab */}
           {activeTab === 'security' && (
             <div className="animate-fade-in">
-              <h2 className="text-lg font-medium text-gray-900 mb-6">Security Settings</h2>
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Security Settings</h2>
               
               <div className="space-y-8">
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-2">Change Password</h3>
+                  <h3 className="text-md font-medium text-gray-900 dark:text-white mb-2">Change Password</h3>
                   <div className="space-y-4 max-w-md">
                     <div>
-                      <label htmlFor="current-password" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Current Password
                       </label>
                       <input
                         type="password"
                         id="current-password"
-                        className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                        className="mt-1 w-full rounded-md border-gray-300 dark:border-dark-600 shadow-sm focus:border-primary-500 dark:focus:border-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         New Password
                       </label>
                       <input
                         type="password"
                         id="new-password"
-                        className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                        className="mt-1 w-full rounded-md border-gray-300 dark:border-dark-600 shadow-sm focus:border-primary-500 dark:focus:border-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Confirm New Password
                       </label>
                       <input
                         type="password"
                         id="confirm-password"
-                        className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                        className="mt-1 w-full rounded-md border-gray-300 dark:border-dark-600 shadow-sm focus:border-primary-500 dark:focus:border-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
                       />
                     </div>
                     
@@ -225,10 +219,11 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="pt-6 border-t border-gray-200">
-                  <h3 className="text-md font-medium text-gray-900 mb-2">Two-Factor Authentication</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                <div className="pt-6 border-t border-gray-200 dark:border-dark-700">
+                  <h3 className="text-md font-medium text-gray-900 dark:text-white mb-2">Two-Factor Authentication</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                     Add an extra layer of security to your account by requiring both your password and a verification code.
+                  
                   </p>
                   <Button variant="outline">
                     Enable 2FA
@@ -241,12 +236,12 @@ const Profile: React.FC = () => {
           {/* Privacy & Data Tab */}
           {activeTab === 'privacy' && (
             <div className="animate-fade-in">
-              <h2 className="text-lg font-medium text-gray-900 mb-6">Privacy & Data</h2>
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Privacy & Data</h2>
               
               <div className="space-y-8">
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-2">Data Storage</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <h3 className="text-md font-medium text-gray-900 dark:text-white mb-2">Data Storage</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                     Control how long we store your submissions and feedback data.
                   </p>
                   <div className="max-w-md">
@@ -257,9 +252,9 @@ const Profile: React.FC = () => {
                           name="data-retention"
                           type="radio"
                           defaultChecked
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                          className="h-4 w-4 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 border-gray-300 dark:border-dark-600"
                         />
-                        <label htmlFor="store-30days" className="ml-3 text-sm font-medium text-gray-700">
+                        <label htmlFor="store-30days" className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
                           Store for 30 days
                         </label>
                       </div>
@@ -270,9 +265,9 @@ const Profile: React.FC = () => {
                           id="store-90days"
                           name="data-retention"
                           type="radio"
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                          className="h-4 w-4 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 border-gray-300 dark:border-dark-600"
                         />
-                        <label htmlFor="store-90days" className="ml-3 text-sm font-medium text-gray-700">
+                        <label htmlFor="store-90days" className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
                           Store for 90 days
                         </label>
                       </div>
@@ -283,9 +278,9 @@ const Profile: React.FC = () => {
                           id="dont-store"
                           name="data-retention"
                           type="radio"
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                          className="h-4 w-4 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 border-gray-300 dark:border-dark-600"
                         />
-                        <label htmlFor="dont-store" className="ml-3 text-sm font-medium text-gray-700">
+                        <label htmlFor="dont-store" className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
                           Don't store submissions
                         </label>
                       </div>
@@ -293,9 +288,9 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="pt-6 border-t border-gray-200">
-                  <h3 className="text-md font-medium text-gray-900 mb-2">Data Export & Deletion</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                <div className="pt-6 border-t border-gray-200 dark:border-dark-700">
+                  <h3 className="text-md font-medium text-gray-900 dark:text-white mb-2">Data Export & Deletion</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                     Export or delete all your data from PurePen.
                   </p>
                   <div className="flex space-x-4">
@@ -303,16 +298,16 @@ const Profile: React.FC = () => {
                       <Download className="h-4 w-4 mr-2" />
                       Export Data
                     </Button>
-                    <Button variant="outline" className="flex items-center text-error-600 border-error-600 hover:bg-error-50">
+                    <Button variant="outline" className="flex items-center text-error-600 dark:text-error-400 border-error-600 dark:border-error-400 hover:bg-error-50 dark:hover:bg-error-900/50">
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete All Data
                     </Button>
                   </div>
                 </div>
                 
-                <div className="pt-6 border-t border-gray-200">
-                  <h3 className="text-md font-medium text-gray-900 mb-2">Privacy Preferences</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                <div className="pt-6 border-t border-gray-200 dark:border-dark-700">
+                  <h3 className="text-md font-medium text-gray-900 dark:text-white mb-2">Privacy Preferences</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                     Control how your data is used within the platform.
                   </p>
                   
@@ -324,14 +319,14 @@ const Profile: React.FC = () => {
                           name="anonymous-data"
                           type="checkbox"
                           defaultChecked
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 border-gray-300 dark:border-dark-600 rounded"
                         />
                       </div>
                       <div className="ml-3 text-sm">
-                        <label htmlFor="anonymous-data" className="font-medium text-gray-700">
+                        <label htmlFor="anonymous-data" className="font-medium text-gray-700 dark:text-gray-300">
                           Anonymous Usage Data
                         </label>
-                        <p className="text-gray-500">
+                        <p className="text-gray-500 dark:text-gray-400">
                           Allow us to collect anonymous data to improve our AI models.
                         </p>
                       </div>
@@ -344,14 +339,14 @@ const Profile: React.FC = () => {
                           name="marketing"
                           type="checkbox"
                           defaultChecked
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 border-gray-300 dark:border-dark-600 rounded"
                         />
                       </div>
                       <div className="ml-3 text-sm">
-                        <label htmlFor="marketing" className="font-medium text-gray-700">
+                        <label htmlFor="marketing" className="font-medium text-gray-700 dark:text-gray-300">
                           Marketing Communications
                         </label>
-                        <p className="text-gray-500">
+                        <p className="text-gray-500 dark:text-gray-400">
                           Receive updates, tips, and promotional content.
                         </p>
                       </div>
