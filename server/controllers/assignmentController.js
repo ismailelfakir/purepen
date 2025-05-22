@@ -11,7 +11,7 @@ export const submitAssignment = async (req, res) => {
 
   try {
     // Create assignment with initial analyzing status
-    let assignment = new Assignment({
+    const assignment = new Assignment({
       userId,
       title,
       content,
@@ -20,37 +20,32 @@ export const submitAssignment = async (req, res) => {
 
     await assignment.save();
 
-    // Analyze text using OpenAI
-    const analysis = await analyzeText(content);
+    // Analyze text using OpenAI in the background
+    analyzeText(content)
+      .then(async (analysis) => {
+        // Update assignment with analysis results
+        assignment.integrityScore = analysis.integrityScore;
+        assignment.feedback = {
+          summary: analysis.summary,
+          items: analysis.feedbackItems
+        };
+        assignment.status = 'complete';
+        await assignment.save();
+      })
+      .catch(async (err) => {
+        console.error('Analysis error:', err);
+        assignment.status = 'error';
+        await assignment.save();
+      });
 
-    // Update assignment with analysis results
-    assignment.integrityScore = analysis.integrityScore;
-    assignment.feedback = {
-      summary: analysis.summary,
-      items: analysis.feedbackItems
-    };
-    assignment.status = 'complete';
-
-    await assignment.save();
-
+    // Return immediately with the assignment ID
     res.json({
       submissionId: assignment._id,
-      analysis,
-      message: 'Assignment submitted and analyzed successfully'
+      message: 'Assignment submitted successfully'
     });
   } catch (err) {
     console.error('Error submitting assignment:', err);
-    
-    // Update assignment status to error if analysis fails
-    if (err.message === 'Failed to analyze text') {
-      try {
-        await Assignment.findByIdAndUpdate(assignment._id, { status: 'error' });
-      } catch (updateErr) {
-        console.error('Error updating assignment status:', updateErr);
-      }
-    }
-    
-    res.status(500).json({ msg: 'Failed to analyze assignment' });
+    res.status(500).json({ msg: 'Failed to submit assignment' });
   }
 };
 
