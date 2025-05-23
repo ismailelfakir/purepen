@@ -1,5 +1,5 @@
 import React from 'react';
-import { Moon, Sun, Crown } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 
 const ThemeToggle: React.FC = () => {
@@ -17,9 +17,6 @@ const ThemeToggle: React.FC = () => {
         ) : (
           <Sun className="h-5 w-5 text-gray-500" />
         )}
-        <div className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full p-0.5">
-          <Crown className="h-2.5 w-2.5 text-white" />
-        </div>
       </div>
     </button>
   );
