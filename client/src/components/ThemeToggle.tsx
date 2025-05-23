@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Moon } from 'lucide-react';
+import { Sun } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 
 const ThemeToggle: React.FC = () => {
@@ -14,7 +14,25 @@ const ThemeToggle: React.FC = () => {
       {isDark ? (
         <Sun className="h-5 w-5 text-gray-500 dark:text-gray-400" />
       ) : (
-        <Moon className="h-5 w-5 text-gray-500" />
+        <svg 
+          className="h-5 w-5 text-gray-500"
+          fill="none"
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 007.92 12.446A9 9 0 1112 3z"
+          />
+        </svg>
       )}
     </button>
   );
